@@ -1,3 +1,3 @@
-# Doc Insight
+# Doc InSight
 
 Coming soon!
