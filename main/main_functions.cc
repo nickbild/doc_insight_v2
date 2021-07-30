@@ -28,7 +28,6 @@ limitations under the License.
 #include "../../components/quirc/lib/quirc.h"
 #include "esp/app_camera_esp.h"
 
-// Globals, used for compatibility with Arduino-style sketches.
 namespace {
 tflite::ErrorReporter* error_reporter = nullptr;
 const tflite::Model* model = nullptr;
@@ -113,8 +112,8 @@ void loop() {
 
   // QR
 
-  kNumCols_quirc = 320;
-  kNumRows_quirc = 240;
+  kNumCols_quirc = 96;
+  kNumRows_quirc = 96;
   uint8_t *image = quirc_begin(qr, &kNumCols_quirc, &kNumRows_quirc);
 
   if (kTfLiteOk != GetImage(error_reporter, kNumCols, kNumRows, kNumChannels, image)) {
@@ -123,16 +122,8 @@ void loop() {
 
   quirc_end(qr);
 
-  // printf("\n----\n");
-  // for(int i=0; i<320*240; i++) {
-  //   printf("%d ", image[i]);  
-  // }
-  // printf("\n----\n");
-
-
-
   int num_codes = quirc_count(qr);
-  printf("num_codes: %d\n", num_codes);
+  // printf("num_codes: %d\n", num_codes);
   for (int i = 0; i < num_codes; i++) {
       struct quirc_code code;
       struct quirc_data data;
@@ -142,31 +133,29 @@ void loop() {
 
       /* Decoding stage */
       err = quirc_decode(&code, &data);
-      if (err)
-          printf("DECODE FAILED: %s\n", quirc_strerror(err));
+      if (err) {}
+          // printf("DECODE FAILED: %s\n", quirc_strerror(err));
       else
-          printf("Data: %s\n", data.payload);
+          printf("**** QR DATA: %s\n", data.payload);
   }
-  
-  
-  
 
   // ML
   
-  // if (kTfLiteOk != GetImage(error_reporter, kNumCols, kNumRows, kNumChannels,
-  //                           input->data.uint8)) {
-  //   TF_LITE_REPORT_ERROR(error_reporter, "Image capture failed.");
-  // }
+  if (kTfLiteOk != GetImage(error_reporter, kNumCols, kNumRows, kNumChannels,
+                            input->data.uint8)) {
+    TF_LITE_REPORT_ERROR(error_reporter, "Image capture failed.");
+  }
 
-  // // Run the model on this input and make sure it succeeds.
-  // if (kTfLiteOk != interpreter->Invoke()) {
-  //   TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed.");
-  // }
+  // Run the model on this input and make sure it succeeds.
+  if (kTfLiteOk != interpreter->Invoke()) {
+    TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed.");
+  }
 
-  // TfLiteTensor* output = interpreter->output(0);
+  TfLiteTensor* output = interpreter->output(0);
 
-  // // Process the inference results.
-  // uint8_t person_score = output->data.uint8[kPersonIndex];
-  // uint8_t no_person_score = output->data.uint8[kNotAPersonIndex];
+  // Process the inference results.
+  uint8_t person_score = output->data.uint8[kPersonIndex];
+  uint8_t no_person_score = output->data.uint8[kNotAPersonIndex];
   // RespondToDetection(error_reporter, person_score, no_person_score);
+  printf("YES: %d\tNO: %d\n", person_score, no_person_score);
 }
