@@ -25,6 +25,8 @@ limitations under the License.
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "tensorflow/lite/version.h"
+#include "../../components/quirc/lib/quirc.h"
+#include "esp/app_camera_esp.h"
 
 // Globals, used for compatibility with Arduino-style sketches.
 namespace {
@@ -38,8 +40,24 @@ constexpr int kTensorArenaSize = 93 * 1024;
 static uint8_t tensor_arena[kTensorArenaSize];
 }  // namespace
 
+struct quirc *qr;
+
+int kNumCols_quirc;
+int kNumRows_quirc;
+
 // The name of this function is important for Arduino compatibility.
 void setup() {
+  qr = quirc_new();
+  if (!qr) {
+      perror("Failed to allocate memory");
+      abort();
+  }
+
+  if (quirc_resize(qr, kNumCols, kNumRows) < 0) {
+      perror("Failed to allocate video memory");
+      abort();
+  }
+
   // Set up logging. Google style is to avoid globals or statics because of
   // lifetime uncertainty, but since this has a trivial destructor it's okay.
   // NOLINTNEXTLINE(runtime-global-variables)
@@ -92,21 +110,63 @@ void setup() {
 
 // The name of this function is important for Arduino compatibility.
 void loop() {
-  // Get image from provider.
-  if (kTfLiteOk != GetImage(error_reporter, kNumCols, kNumRows, kNumChannels,
-                            input->data.uint8)) {
-    TF_LITE_REPORT_ERROR(error_reporter, "Image capture failed.");
+
+  // QR
+
+  kNumCols_quirc = 320;
+  kNumRows_quirc = 240;
+  uint8_t *image = quirc_begin(qr, &kNumCols_quirc, &kNumRows_quirc);
+
+  if (kTfLiteOk != GetImage(error_reporter, kNumCols, kNumRows, kNumChannels, image)) {
+    TF_LITE_REPORT_ERROR(error_reporter, "QR Image capture failed.");
   }
 
-  // Run the model on this input and make sure it succeeds.
-  if (kTfLiteOk != interpreter->Invoke()) {
-    TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed.");
+  quirc_end(qr);
+
+  // printf("\n----\n");
+  // for(int i=0; i<320*240; i++) {
+  //   printf("%d ", image[i]);  
+  // }
+  // printf("\n----\n");
+
+
+
+  int num_codes = quirc_count(qr);
+  printf("num_codes: %d\n", num_codes);
+  for (int i = 0; i < num_codes; i++) {
+      struct quirc_code code;
+      struct quirc_data data;
+      quirc_decode_error_t err;
+
+      quirc_extract(qr, i, &code);
+
+      /* Decoding stage */
+      err = quirc_decode(&code, &data);
+      if (err)
+          printf("DECODE FAILED: %s\n", quirc_strerror(err));
+      else
+          printf("Data: %s\n", data.payload);
   }
+  
+  
+  
 
-  TfLiteTensor* output = interpreter->output(0);
+  // ML
+  
+  // if (kTfLiteOk != GetImage(error_reporter, kNumCols, kNumRows, kNumChannels,
+  //                           input->data.uint8)) {
+  //   TF_LITE_REPORT_ERROR(error_reporter, "Image capture failed.");
+  // }
 
-  // Process the inference results.
-  uint8_t person_score = output->data.uint8[kPersonIndex];
-  uint8_t no_person_score = output->data.uint8[kNotAPersonIndex];
-  RespondToDetection(error_reporter, person_score, no_person_score);
+  // // Run the model on this input and make sure it succeeds.
+  // if (kTfLiteOk != interpreter->Invoke()) {
+  //   TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed.");
+  // }
+
+  // TfLiteTensor* output = interpreter->output(0);
+
+  // // Process the inference results.
+  // uint8_t person_score = output->data.uint8[kPersonIndex];
+  // uint8_t no_person_score = output->data.uint8[kNotAPersonIndex];
+  // RespondToDetection(error_reporter, person_score, no_person_score);
 }
