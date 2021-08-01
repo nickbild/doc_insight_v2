@@ -1,37 +1,18 @@
-python3 models/research/slim/train_image_classifier.py \
-    --train_dir=training_output \
-    --dataset_split_name=train \
-    --dataset_dir=data \
-    --model_name=mobilenet_v1_025 \
-    --preprocessing_name=mobilenet_v1 \
-    --train_image_size=96 \
-    --input_grayscale=True \
-    --save_summaries_secs=300 \
-    --learning_rate=0.045 \
-    --label_smoothing=0.1 \
-    --learning_rate_decay_factor=0.98 \
-    --num_epochs_per_decay=2.5 \
-    --moving_average_decay=0.9999 \
-    --batch_size=32 \
-    --max_number_of_steps=1000000
+make_image_classifier \
+  --image_dir data \
+  --tfhub_module https://tfhub.dev/google/imagenet/mobilenet_v1_025_128/feature_vector/5 \
+  --image_size 96 \
+  --saved_model_dir trained_model \
+  --labels_output_file class_labels.txt \
+  --tflite_output_file doc_insight.tflite \
+  --summaries_dir tf_logs
 
+# "trained_model/saved_model.pb" TF SavedModel has been created by training on input images.
 
+python3 quantize.py
 
-python3 models/research/slim/train_image_classifier.py \
-    --train_dir=training_output \
-    --dataset_name=hand_washing \
-    --dataset_split_name=train \
-    --dataset_dir=data \
-    --model_name=mobilenet_v1_025 \
-    --preprocessing_name=mobilenet_v1 \
-    --train_image_size=96 \
-    --input_grayscale=True \
-    --save_summaries_secs=300 \
-    --learning_rate=0.045 \
-    --label_smoothing=0.1 \
-    --learning_rate_decay_factor=0.98 \
-    --num_epochs_per_decay=2.5 \
-    --moving_average_decay=0.9999 \
-    --batch_size=32 \
-    --max_number_of_steps=1000000
-    
+# SavedModel converted to quantized TF Lite model: "doc_insight.lite.quant.pb"
+
+python3 gen_micro_model.py
+
+# Final output generated: "doc_insight.micro.quant.pb"
