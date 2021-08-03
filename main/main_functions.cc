@@ -23,6 +23,7 @@ limitations under the License.
 #include "tensorflow/lite/micro/micro_error_reporter.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
+#include "tensorflow/lite/micro/all_ops_resolver.h"
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "tensorflow/lite/version.h"
 #include "../../components/quirc/lib/quirc.h"
@@ -35,7 +36,8 @@ tflite::MicroInterpreter* interpreter = nullptr;
 TfLiteTensor* input = nullptr;
 
 // An area of memory to use for input, output, and intermediate arrays.
-constexpr int kTensorArenaSize = 93 * 1024;
+// constexpr int kTensorArenaSize = 93 * 1024;
+constexpr int kTensorArenaSize = 150 * 1024;
 static uint8_t tensor_arena[kTensorArenaSize];
 }  // namespace
 
@@ -82,18 +84,26 @@ void setup() {
   //
   // tflite::AllOpsResolver resolver;
   // NOLINTNEXTLINE(runtime-global-variables)
-  static tflite::MicroMutableOpResolver<3> micro_op_resolver;
-  micro_op_resolver.AddBuiltin(
-      tflite::BuiltinOperator_DEPTHWISE_CONV_2D,
-      tflite::ops::micro::Register_DEPTHWISE_CONV_2D());
-  micro_op_resolver.AddBuiltin(tflite::BuiltinOperator_CONV_2D,
-                               tflite::ops::micro::Register_CONV_2D());
-  micro_op_resolver.AddBuiltin(tflite::BuiltinOperator_AVERAGE_POOL_2D,
-                               tflite::ops::micro::Register_AVERAGE_POOL_2D());
+  // static tflite::AllOpsResolver micro_op_resolver;
+
+  // static tflite::MicroMutableOpResolver<3> micro_op_resolver;
+  // micro_op_resolver.AddBuiltin(tflite::BuiltinOperator_DEPTHWISE_CONV_2D,
+  //                              tflite::ops::micro::Register_DEPTHWISE_CONV_2D());
+  // micro_op_resolver.AddBuiltin(tflite::BuiltinOperator_CONV_2D,
+  //                              tflite::ops::micro::Register_CONV_2D());
+  // micro_op_resolver.AddBuiltin(tflite::BuiltinOperator_AVERAGE_POOL_2D,
+  //                              tflite::ops::micro::Register_AVERAGE_POOL_2D());
+  // micro_op_resolver.AddConv2D();
+  // micro_op_resolver.AddFullyConnected();
+  // micro_op_resolver.AddSoftmax();
+  // micro_op_resolver.AddReshape();
+  // micro_op_resolver.AddQuantize();
 
   // Build an interpreter to run the model with.
+  // static tflite::MicroInterpreter static_interpreter(
+  //     model, micro_op_resolver, tensor_arena, kTensorArenaSize, error_reporter);
   static tflite::MicroInterpreter static_interpreter(
-      model, micro_op_resolver, tensor_arena, kTensorArenaSize, error_reporter);
+      model, tflite::AllOpsResolver(), tensor_arena, kTensorArenaSize, error_reporter);
   interpreter = &static_interpreter;
 
   // Allocate memory from the tensor_arena for the model's tensors.

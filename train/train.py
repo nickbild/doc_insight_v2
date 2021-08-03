@@ -24,6 +24,7 @@ tf.random.set_seed(seed)
 # Load data.
 train_ds = tf.keras.preprocessing.image_dataset_from_directory(
     "data/",
+    color_mode="grayscale",
     validation_split=0.2,
     subset="training",
     seed=123,
@@ -32,6 +33,7 @@ train_ds = tf.keras.preprocessing.image_dataset_from_directory(
 
 val_ds = tf.keras.preprocessing.image_dataset_from_directory(
     "data/",
+    color_mode="grayscale",
     validation_split=0.2,
     subset="validation",
     seed=123,
@@ -40,15 +42,14 @@ val_ds = tf.keras.preprocessing.image_dataset_from_directory(
 
 # Build model.
 model = tf.keras.Sequential([
-    tf.keras.layers.experimental.preprocessing.Rescaling(1./255),
-    tf.keras.layers.Conv2D(32, 3, activation='relu'),
-    tf.keras.layers.MaxPooling2D(),
-    tf.keras.layers.Conv2D(32, 3, activation='relu'),
-    tf.keras.layers.MaxPooling2D(),
-    tf.keras.layers.Conv2D(32, 3, activation='relu'),
-    tf.keras.layers.MaxPooling2D(),
+    tf.keras.layers.Conv2D(6, 3, activation='relu'),
+    tf.keras.layers.AveragePooling2D(),
+    tf.keras.layers.Conv2D(6, 3, activation='relu'),
+    tf.keras.layers.AveragePooling2D(),
+    tf.keras.layers.Conv2D(6, 3, activation='relu'),
+    tf.keras.layers.AveragePooling2D(),
     tf.keras.layers.Flatten(),
-    tf.keras.layers.Dense(128, activation='relu'),
+    tf.keras.layers.Dense(12, activation='relu'),
     tf.keras.layers.Dense(2)
 ])
 
@@ -94,5 +95,5 @@ open(MODEL_TFLITE, "wb").write(model_tflite)
 # Convert model for microcontroller.
 os.system("xxd -i {0} > {1}".format(MODEL_TFLITE, MODEL_TFLITE_MICRO))
 # Update variable names
-REPLACE_TEXT = MODEL_TFLITE.replace('/', '_').replace('.', '_')
+REPLACE_TEXT = MODEL_TFLITE_MICRO.replace('/', '_').replace('.', '_')
 os.system("sed -i 's/'{0}'/g_model/g' {1}".format(REPLACE_TEXT, MODEL_TFLITE_MICRO))
