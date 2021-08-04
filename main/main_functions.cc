@@ -28,6 +28,7 @@ limitations under the License.
 #include "tensorflow/lite/version.h"
 #include "../../components/quirc/lib/quirc.h"
 #include "esp/app_camera_esp.h"
+#include <ctime>
 
 namespace {
 tflite::ErrorReporter* error_reporter = nullptr;
@@ -45,6 +46,8 @@ struct quirc *qr;
 
 int kNumCols_quirc;
 int kNumRows_quirc;
+
+long int last_hand_wash = 0;
 
 // The name of this function is important for Arduino compatibility.
 void setup() {
@@ -137,16 +140,18 @@ void loop() {
   for (int i = 0; i < num_codes; i++) {
       struct quirc_code code;
       struct quirc_data data;
-      quirc_decode_error_t err;
-
+      
       quirc_extract(qr, i, &code);
 
       /* Decoding stage */
-      err = quirc_decode(&code, &data);
-      if (err)
-          printf("DECODE FAILED: %s\n", quirc_strerror(err));
-      else
-          printf("**** QR DATA: %s\n", data.payload);
+      if (!quirc_decode(&code, &data)) {
+        // process_qr_code(&data->payload);
+        // printf("**** QR DATA: %s\n", data.payload);
+        printf("decode success\n");        
+      } else {
+        // printf("DECODE FAILED: %s\n", quirc_strerror(err));
+        printf("decode fail\n");
+      }
   }
 
   // ML
@@ -164,8 +169,23 @@ void loop() {
   TfLiteTensor* output = interpreter->output(0);
 
   // Process the inference results.
-  uint8_t person_score = output->data.uint8[kPersonIndex];
-  uint8_t no_person_score = output->data.uint8[kNotAPersonIndex];
-  // RespondToDetection(error_reporter, person_score, no_person_score);
-  printf("YES: %d\tNO: %d\n", person_score, no_person_score);
+  uint8_t wash_score = output->data.uint8[kPersonIndex];
+  uint8_t no_wash_score = output->data.uint8[kNotAPersonIndex];
+  // printf("YES: %d\tNO: %d\n", wash_score, no_wash_score);
+  
+  // Hand washing detected?
+  if (wash_score > (no_wash_score * 1.25)) {
+    time_t now = time(0);
+    printf("Handwashing detected at: %ld\n", now);
+    last_hand_wash = now;
+  }
+
+}
+
+void process_qr_code(unsigned char* qr_code) {
+  if (qr_code == (unsigned char*)"http://balls") {
+    printf("%s", "big balls !!!!!!!!!!");
+  } else {
+    printf("here: %s", qr_code);
+  }
 }
