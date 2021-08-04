@@ -143,8 +143,8 @@ void loop() {
 
       /* Decoding stage */
       err = quirc_decode(&code, &data);
-      if (err) {}
-          // printf("DECODE FAILED: %s\n", quirc_strerror(err));
+      if (err)
+          printf("DECODE FAILED: %s\n", quirc_strerror(err));
       else
           printf("**** QR DATA: %s\n", data.payload);
   }
