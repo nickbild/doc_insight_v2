@@ -11,7 +11,11 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-==============================================================================*/
+==============================================================================
+Modified by Nick Bild (nick.bild@gmail.com)
+August 2021
+https://github.com/nickbild/doc_insight_v2
+*/
 
 #include "main_functions.h"
 
@@ -29,28 +33,57 @@ limitations under the License.
 #include "../../components/quirc/lib/quirc.h"
 #include "esp/app_camera_esp.h"
 #include <ctime>
+#include <map>
+#include <string>
+#include <iostream>
+#include <sstream>
 
 namespace {
-tflite::ErrorReporter* error_reporter = nullptr;
-const tflite::Model* model = nullptr;
-tflite::MicroInterpreter* interpreter = nullptr;
-TfLiteTensor* input = nullptr;
 
-// An area of memory to use for input, output, and intermediate arrays.
-// constexpr int kTensorArenaSize = 93 * 1024;
-constexpr int kTensorArenaSize = 150 * 1024;
-static uint8_t tensor_arena[kTensorArenaSize];
-}  // namespace
+  tflite::ErrorReporter* error_reporter = nullptr;
+  const tflite::Model* model = nullptr;
+  tflite::MicroInterpreter* interpreter = nullptr;
+  TfLiteTensor* input = nullptr;
 
-struct quirc *qr;
+  constexpr int kTensorArenaSize = 93 * 1024;
+  static uint8_t tensor_arena[kTensorArenaSize];
 
-int kNumCols_quirc;
-int kNumRows_quirc;
+  struct quirc *qr;
+  uint8_t *image;
 
-long int last_hand_wash = 0;
+  int kNumCols_quirc;
+  int kNumRows_quirc;
 
-// The name of this function is important for Arduino compatibility.
+  long int last_hand_wash = 1;
+  std::string last_patient_seen = "";
+  std::string last_patient_seen_allergies = "";
+
+  // Substitute a DB connection for practical uses.
+
+  // PaientID: PatientFirstName ; PatientLastName ; PatientAge ; PatientGender ; MedicationAllergies
+  std::map<std::string, std::string> patients = {
+      { "P123456789", "Jane Doe 46 F M984738903" },
+      { "P125437897", "Joe Smith 32 M NA" },
+      { "P839839767", "Linda Johnson 23 F M843987775" }
+  };
+
+  // MedicationID: MedicationName
+  std::map<std::string, std::string> medications = {
+      { "M984738903", "Atorvastatin" },
+      { "M843987775", "Amlodipine" }
+  };
+
+  // PatientID: MedicationID
+  std::map<std::string, std::string> prescribed_medications = {
+      { "P125437897", "M984738903" },
+      { "P123456789", "M843987775" }
+  };
+
+}
+
 void setup() {
+  // QR
+
   qr = quirc_new();
   if (!qr) {
       perror("Failed to allocate memory");
@@ -62,14 +95,14 @@ void setup() {
       abort();
   }
 
-  // Set up logging. Google style is to avoid globals or statics because of
-  // lifetime uncertainty, but since this has a trivial destructor it's okay.
-  // NOLINTNEXTLINE(runtime-global-variables)
+  kNumCols_quirc = 96;
+  kNumRows_quirc = 96;
+
+  // ML
+
   static tflite::MicroErrorReporter micro_error_reporter;
   error_reporter = &micro_error_reporter;
 
-  // Map the model into a usable data structure. This doesn't involve any
-  // copying or parsing, it's a very lightweight operation.
   model = tflite::GetModel(g_person_detect_model_data);
   if (model->version() != TFLITE_SCHEMA_VERSION) {
     TF_LITE_REPORT_ERROR(error_reporter,
@@ -79,32 +112,6 @@ void setup() {
     return;
   }
 
-  // Pull in only the operation implementations we need.
-  // This relies on a complete list of all the ops needed by this graph.
-  // An easier approach is to just use the AllOpsResolver, but this will
-  // incur some penalty in code space for op implementations that are not
-  // needed by this graph.
-  //
-  // tflite::AllOpsResolver resolver;
-  // NOLINTNEXTLINE(runtime-global-variables)
-  // static tflite::AllOpsResolver micro_op_resolver;
-
-  // static tflite::MicroMutableOpResolver<3> micro_op_resolver;
-  // micro_op_resolver.AddBuiltin(tflite::BuiltinOperator_DEPTHWISE_CONV_2D,
-  //                              tflite::ops::micro::Register_DEPTHWISE_CONV_2D());
-  // micro_op_resolver.AddBuiltin(tflite::BuiltinOperator_CONV_2D,
-  //                              tflite::ops::micro::Register_CONV_2D());
-  // micro_op_resolver.AddBuiltin(tflite::BuiltinOperator_AVERAGE_POOL_2D,
-  //                              tflite::ops::micro::Register_AVERAGE_POOL_2D());
-  // micro_op_resolver.AddConv2D();
-  // micro_op_resolver.AddFullyConnected();
-  // micro_op_resolver.AddSoftmax();
-  // micro_op_resolver.AddReshape();
-  // micro_op_resolver.AddQuantize();
-
-  // Build an interpreter to run the model with.
-  // static tflite::MicroInterpreter static_interpreter(
-  //     model, micro_op_resolver, tensor_arena, kTensorArenaSize, error_reporter);
   static tflite::MicroInterpreter static_interpreter(
       model, tflite::AllOpsResolver(), tensor_arena, kTensorArenaSize, error_reporter);
   interpreter = &static_interpreter;
@@ -116,18 +123,16 @@ void setup() {
     return;
   }
 
-  // Get information about the memory area to use for the model's input.
   input = interpreter->input(0);
 }
 
-// The name of this function is important for Arduino compatibility.
 void loop() {
+  process_qr_code((unsigned char*)"P123456789");
+  process_qr_code((unsigned char*)"M843987775");
 
   // QR
 
-  kNumCols_quirc = 96;
-  kNumRows_quirc = 96;
-  uint8_t *image = quirc_begin(qr, &kNumCols_quirc, &kNumRows_quirc);
+  image = quirc_begin(qr, &kNumCols_quirc, &kNumRows_quirc);
 
   if (kTfLiteOk != GetImage(error_reporter, kNumCols, kNumRows, kNumChannels, image)) {
     TF_LITE_REPORT_ERROR(error_reporter, "QR Image capture failed.");
@@ -136,21 +141,16 @@ void loop() {
   quirc_end(qr);
 
   int num_codes = quirc_count(qr);
-  // printf("num_codes: %d\n", num_codes);
   for (int i = 0; i < num_codes; i++) {
       struct quirc_code code;
       struct quirc_data data;
       
       quirc_extract(qr, i, &code);
 
-      /* Decoding stage */
       if (!quirc_decode(&code, &data)) {
-        // process_qr_code(&data->payload);
-        // printf("**** QR DATA: %s\n", data.payload);
-        printf("decode success\n");        
+        process_qr_code(data.payload);
       } else {
-        // printf("DECODE FAILED: %s\n", quirc_strerror(err));
-        printf("decode fail\n");
+        printf("QR decoding failed.\n");
       }
   }
 
@@ -171,7 +171,6 @@ void loop() {
   // Process the inference results.
   uint8_t wash_score = output->data.uint8[kPersonIndex];
   uint8_t no_wash_score = output->data.uint8[kNotAPersonIndex];
-  // printf("YES: %d\tNO: %d\n", wash_score, no_wash_score);
   
   // Hand washing detected?
   if (wash_score > (no_wash_score * 1.25)) {
@@ -183,9 +182,56 @@ void loop() {
 }
 
 void process_qr_code(unsigned char* qr_code) {
-  if (qr_code == (unsigned char*)"http://balls") {
-    printf("%s", "big balls !!!!!!!!!!");
-  } else {
-    printf("here: %s", qr_code);
+  std::string line(reinterpret_cast<char*>(qr_code));
+
+  if (line[0] == 'P') { // Patient
+    std::string ptid(reinterpret_cast<char*>(qr_code));
+    std::string pt = patients[ptid];
+    std::string arr[5];
+    int i = 0;
+    std::stringstream ssin(pt);
+    while (ssin.good() && i < 5){
+        ssin >> arr[i];
+        ++i;
+    }
+    
+    last_patient_seen = line;
+    last_patient_seen_allergies = arr[4];
+    patient_found(line, arr[0], arr[1], arr[2], arr[3], arr[4]);
+
+  } else if (line[0] == 'M') { // Medication
+    std::string medid(reinterpret_cast<char*>(qr_code));
+    med_found(medid, medications[medid]);
+  }
+
+}
+
+void patient_found(std::string PatientID, std::string PatientFirstName, std::string PatientLastName, std::string PatientAge, std::string PatientGender, std::string MedicationAllergies) {
+  // Show patient info on display.
+  // printf("%s\n", PatientAge.c_str());
+  
+  // Alert if hands not washed prior to seeing patient.
+  time_t now = time(0);
+  int diff = now - last_hand_wash;
+  if (diff > 120) {
+    printf("Hands have not been washed within 2 minutes of encountering patient!\n");
+  }
+  
+}
+
+void med_found(std::string MedicationID, std::string MedicationName) {
+  // printf("%s\n", MedicationName.c_str());
+  if (last_patient_seen != "") {
+    // printf("%s\n", last_patient_seen.c_str());
+    
+    // Check for allergies.
+    if (MedicationID == last_patient_seen_allergies) {
+      printf("Patient is allergic to this med!\n");
+    }
+
+    // Check if med was prescribed to patient.
+    if (prescribed_medications[last_patient_seen] != MedicationID) {
+      printf("Patient has not been prescribed this medication!\n");
+    }
   }
 }

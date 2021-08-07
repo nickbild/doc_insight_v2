@@ -11,7 +11,12 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-==============================================================================*/
+==============================================================================
+Modified by Nick Bild (nick.bild@gmail.com)
+August 2021
+https://github.com/nickbild/doc_insight_v2
+*/
+#include <string>
 
 #ifndef TENSORFLOW_LITE_MICRO_EXAMPLES_PERSON_DETECTION_MAIN_FUNCTIONS_H_
 #define TENSORFLOW_LITE_MICRO_EXAMPLES_PERSON_DETECTION_MAIN_FUNCTIONS_H_
@@ -29,6 +34,10 @@ void setup();
 // repeatedly from the application code. The name needs to be loop() for Arduino
 // compatibility.
 void loop();
+
+void process_qr_code(unsigned char*);
+void patient_found(std::string, std::string, std::string, std::string, std::string, std::string);
+void med_found(std::string, std::string);
 
 #ifdef __cplusplus
 }
