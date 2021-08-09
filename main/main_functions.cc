@@ -37,6 +37,12 @@ https://github.com/nickbild/doc_insight_v2
 #include <string>
 #include <iostream>
 #include <sstream>
+#include "driver/gpio.h"
+
+#define GPIO_D1     (gpio_num_t)19   // SPI CS
+#define GPIO_D2      (gpio_num_t)2   // SPI DIN
+#define GPIO_D3     (gpio_num_t)12   // SPI DOUT
+#define GPIO_OUTPUT_PIN_SEL  ((1ULL<<GPIO_CS) | (1ULL<<GPIO_DIN) | (1ULL<<GPIO_DOUT))
 
 namespace {
 
@@ -63,7 +69,7 @@ namespace {
   // PaientID: PatientFirstName ; PatientLastName ; PatientAge ; PatientGender ; MedicationAllergies
   std::map<std::string, std::string> patients = {
       { "P123456789", "Jane Doe 46 F M984738903" },
-      { "P125437897", "Joe Smith 32 M NA" },
+      { "P125437897", "Greg Bay 55 M NA" },
       { "P839839767", "Linda Johnson 23 F M843987775" }
   };
 
@@ -208,13 +214,24 @@ void process_qr_code(unsigned char* qr_code) {
 
 void patient_found(std::string PatientID, std::string PatientFirstName, std::string PatientLastName, std::string PatientAge, std::string PatientGender, std::string MedicationAllergies) {
   // Show patient info on display.
-  // printf("%s\n", PatientAge.c_str());
+  if (PatientID == "P125437897") {
+    gpio_set_level(GPIO_D1, 1);
+    gpio_set_level(GPIO_D2, 1);
+    gpio_set_level(GPIO_D3, 0);
+  } else if (PatientID == "P123456789") {
+    gpio_set_level(GPIO_D1, 1);
+    gpio_set_level(GPIO_D2, 0);
+    gpio_set_level(GPIO_D3, 0);
+  }
   
   // Alert if hands not washed prior to seeing patient.
   time_t now = time(0);
   int diff = now - last_hand_wash;
   if (diff > 120) {
     printf("Hands have not been washed within 2 minutes of encountering patient!\n");
+    gpio_set_level(GPIO_D1, 1);
+    gpio_set_level(GPIO_D2, 1);
+    gpio_set_level(GPIO_D3, 1);
   }
   
 }
@@ -227,11 +244,17 @@ void med_found(std::string MedicationID, std::string MedicationName) {
     // Check for allergies.
     if (MedicationID == last_patient_seen_allergies) {
       printf("Patient is allergic to this med!\n");
+      gpio_set_level(GPIO_D1, 0);
+      gpio_set_level(GPIO_D2, 1);
+      gpio_set_level(GPIO_D3, 1);
     }
 
     // Check if med was prescribed to patient.
     if (prescribed_medications[last_patient_seen] != MedicationID) {
       printf("Patient has not been prescribed this medication!\n");
+      gpio_set_level(GPIO_D1, 0);
+      gpio_set_level(GPIO_D2, 0);
+      gpio_set_level(GPIO_D3, 0);
     }
   }
 }
