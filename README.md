@@ -56,6 +56,20 @@ The prepared LCD:
 
 ## Bill of Materials
 
+- Espressif ESP-EYE development board with OV2640 image sensor
+- Extended length flat ribbon cable for image sensor
+- Nokia 5110 LCD
+- Adafruit QT Py
+- Adafruit Powerboost 500 Charger
+- 2000 mAh LiPo battery
+- Micro USB breakout board
+- USB-C breakout board
+- Miscellaneous wires
+- Wooden dowels
+- Hot glue
+- Glasses frame
+- Metal disc or similar for counterweight
+
 ## About the Author
 
 [Nick A. Bild, MS](https://nickbild79.firebaseapp.com/#!/)
