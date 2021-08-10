@@ -16,7 +16,7 @@ Two types of QR codes are currently detected—those affixed to patients, and th
 
 When medications are in view, they will be compared to both the medications prescribed to the last patient seen, as well as that patient's allergies.  In the former case, a "Not prescribed" warning will be displayed if they have not been prescribed that medication; in the latter case, an "Allergy Alert" is shown if they are allergic to the medication.
 
-A custom convolutional neural network was developed and trained in TensorFlow Lite for handwashing recognition ([code here](https://github.com/nickbild/doc_insight_v2/tree/main/train)).
+A custom convolutional neural network was developed and trained in TensorFlow Lite for handwashing recognition ([code here](https://github.com/nickbild/doc_insight_v2/tree/main/train)).  The model was quantized and converted to an appropriate structure for use with a microcontroller.
 
 Due to a lack of available GPIO pins on the ESP-EYE, an Adafruit QT Py microcontroller was included to control the Nokia 5110 LCD display.  The LCD was removed from the breakout board, and the backing was removed to make it transparent.  Wires were soldered to the pads to allow it to be controlled from the QT Py.  For this prototype, a structure was created from wooden dowels to extend the LCD sufficiently in front of the wearer's eye to bring the display into focus.
 
