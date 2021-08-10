@@ -30,16 +30,16 @@ The glasses, partially disassembled to show components:
 Our patient:<br/>
 ![Our patient](https://raw.githubusercontent.com/nickbild/doc_insight_v2/main/media/patient_alone_sm_annotate.jpg)
 
-Our patient as seen by Doc InSight wearer:
+Our patient as seen by Doc InSight wearer:<br/>
 ![Our patient glasses](https://raw.githubusercontent.com/nickbild/doc_insight_v2/main/media/patient_2_sm_crop.jpg)
 
 A medication bottle:<br/>
 ![](https://raw.githubusercontent.com/nickbild/doc_insight_v2/main/media/bottle_alone_sm.jpg)
 
-Allergy alert example:
+Allergy alert example:<br/>
 ![](https://raw.githubusercontent.com/nickbild/doc_insight_v2/main/media/allergy_alert_sm.jpg)
 
-Unprescribed medication warning:
+Unprescribed medication warning:<br/>
 ![](https://raw.githubusercontent.com/nickbild/doc_insight_v2/main/media/not_prescribed_sm.jpg)
 
 
