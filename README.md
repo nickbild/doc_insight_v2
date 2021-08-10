@@ -18,9 +18,9 @@ When medications are in view, they will be compared to both the medications pres
 
 A custom convolutional neural network was developed and trained in TensorFlow Lite for handwashing recognition ([code here](https://github.com/nickbild/doc_insight_v2/tree/main/train)).
 
-Due to a lack of available GPIO pins on the ESP-EYE, an Adafruit QT Py microcontroller was included to control the Nokia 5110 LCD display.  The LCD was removed from the breakout board, and the backing was removed to make it transparent.  Wires were soldered to the pads to allow it to be controlled from the QT Py.
+Due to a lack of available GPIO pins on the ESP-EYE, an Adafruit QT Py microcontroller was included to control the Nokia 5110 LCD display.  The LCD was removed from the breakout board, and the backing was removed to make it transparent.  Wires were soldered to the pads to allow it to be controlled from the QT Py.  For this prototype, a structure was created from wooden dowels to extend the LCD sufficiently in front of the wearer's eye to bring the display into focus.
 
-A 2000 mAh LiPo battery and an Adafruit PowerBoost 500 Charger were included to supply power for both microcontrollers.
+A 2000 mAh LiPo battery and an Adafruit PowerBoost 500 Charger were included to supply power for both microcontrollers.  All components were fit into a small plastic case that was attached to the frames of a pair of glasses.
 
 ## Media
 
@@ -33,6 +33,14 @@ Our patient:<br/>
 Our patient as seen by Doc InSight wearer:
 ![Our patient glasses](https://raw.githubusercontent.com/nickbild/doc_insight_v2/main/media/patient_2_sm_crop.jpg)
 
+A medication bottle:
+![](https://raw.githubusercontent.com/nickbild/doc_insight_v2/main/media/bottle_alone_sm.jpg)
+
+Allergy alert example:
+![](https://raw.githubusercontent.com/nickbild/doc_insight_v2/main/media/allergy_alert_sm.jpg)
+
+Unprescribed medication warning:
+![](https://raw.githubusercontent.com/nickbild/doc_insight_v2/main/media/not_prescribed_sm.jpg)
 
 
 ## Bill of Materials
