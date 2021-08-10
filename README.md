@@ -42,6 +42,17 @@ Allergy alert example:<br/>
 Unprescribed medication warning:<br/>
 ![](https://raw.githubusercontent.com/nickbild/doc_insight_v2/main/media/not_prescribed_sm.jpg)
 
+Front view:
+![](https://raw.githubusercontent.com/nickbild/doc_insight_v2/main/media/full_glasses_angle_sm.jpg)
+
+Close up:
+![](https://raw.githubusercontent.com/nickbild/doc_insight_v2/main/media/glasses_camera_lcd_close_sm.jpg)
+
+Another view:
+![](https://raw.githubusercontent.com/nickbild/doc_insight_v2/main/media/lcd_back_angle_sm.jpg)
+
+The prepared LCD:
+![](https://raw.githubusercontent.com/nickbild/doc_insight_v2/main/media/nokia_5110_sm.jpg)
 
 ## Bill of Materials
 
