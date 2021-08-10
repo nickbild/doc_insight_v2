@@ -1,6 +1,6 @@
 # Doc InSight
 
-Doc InSight provides an augmented reality heads-up display for health care professionals. Relevant medical information from an electronic health record is displayed in the wearer's field of vision when environmental QR codes are detected. The information display is completely passive and hands-free.  No action is required of the user.
+Doc InSight provides an augmented reality heads-up display, built into a pair of glasses, for health care professionals. Relevant medical information from an electronic health record is displayed in the wearer's field of vision when environmental QR codes are detected. The information display is completely passive and hands-free.  No action is required of the user.
 
 A machine learning (ML) algorithm runs in the background to enhance patient safety.  In particular, two of the most common medical errors are treatment-related infections, and medication errors.  Doc InSight seeks to eliminate these types of errors without saddling health care providers with additional procedures to follow that reduce their time treating patients, and have also been shown to lead to physician burnout.
 
@@ -10,7 +10,7 @@ A machine learning (ML) algorithm runs in the background to enhance patient safe
 
 ## How It Works
 
-An Espressif ESP-EYE ESP32-based development board with an OV2640 image sensor captures images of what the wearer of Doc InSight sees, and runs two primary algorithms: 1) a TensorFlow Lite for Microcontrollers neural network, and 2) a QR code decoding algorithm ([code here](https://github.com/nickbild/doc_insight_v2/tree/main/main)).
+An Espressif ESP-EYE ESP32-based development board with an OV2640 image sensor captures images of what the wearer of Doc InSight sees, and runs two primary algorithms against those images: 1) a TensorFlow Lite for Microcontrollers neural network, and 2) a QR code decoding algorithm ([code here](https://github.com/nickbild/doc_insight_v2/tree/main/main)).
 
 Two types of QR codes are currently detected—those affixed to patients, and those affixed to medications.  When a patient is detected, their information (name, age, gender) is displayed on a transparent LCD within the wearer's field of vision.  Additionally, if the provider has not washed their hands (as determined by the ML algorithm) within two minutes of encountering the patient, a hand washing reminder is also displayed.
 
@@ -69,6 +69,12 @@ The prepared LCD:
 - Hot glue
 - Glasses frame
 - Metal disc or similar for counterweight
+
+## Future Direction
+
+First, I would like to minituarize the design with purpose-built hardware, rather than using off-the-shelf development kits.  I would also like to be able to hook Doc InSight up to a real EHR in order to pull in more relevant information (e.g. vitals).  The ML algorithms could be extended to assess further patient risk areas (e.g. likelihood of a fall for inpatients).
+
+The ideal, final version of the device would replace the majority of functions that a provider now has to perform in an EHR, freeing physicians to spend more time on patient care.
 
 ## About the Author
 
