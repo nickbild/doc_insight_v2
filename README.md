@@ -25,7 +25,7 @@ A 2000 mAh LiPo battery and an Adafruit PowerBoost 500 Charger were included to 
 ## Media
 
 The glasses, partially disassembled to show components:
-![](https://raw.githubusercontent.com/nickbild/doc_insight_v2/main/media/top_opened_sm.jpg)
+![](https://raw.githubusercontent.com/nickbild/doc_insight_v2/main/media/top_opened_sm_annotate.jpg)
 
 Our patient:<br/>
 ![Our patient](https://raw.githubusercontent.com/nickbild/doc_insight_v2/main/media/patient_alone_sm_annotate.jpg)
