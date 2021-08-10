@@ -72,7 +72,7 @@ The prepared LCD:
 
 ## Future Direction
 
-First, I would like to minituarize the design with purpose-built hardware, rather than using off-the-shelf development kits.  I would also like to be able to hook Doc InSight up to a real EHR in order to pull in more relevant information (e.g. vitals).  The ML algorithms could be extended to assess further patient risk areas (e.g. likelihood of a fall for inpatients).
+First, I would like to miniaturize the design with purpose-built hardware, rather than using off-the-shelf development kits.  I would also like to be able to hook Doc InSight up to a real EHR in order to pull in more relevant information (e.g. vitals).  The ML algorithms could be extended to assess further patient risk areas (e.g. likelihood of a fall for inpatients).
 
 The ideal, final version of the device would replace the majority of functions that a provider now has to perform in an EHR, freeing physicians to spend more time on patient care, while giving subtle reminders that improve patient outcomes.
 
