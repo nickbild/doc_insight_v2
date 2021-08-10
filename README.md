@@ -28,7 +28,7 @@ The glasses, partially disassembled to show components:
 ![](https://raw.githubusercontent.com/nickbild/doc_insight_v2/main/media/top_opened_sm.jpg)
 
 Our patient:<br/>
-![Our patient](https://raw.githubusercontent.com/nickbild/doc_insight_v2/main/media/patient_alone_sm.jpg)
+![Our patient](https://raw.githubusercontent.com/nickbild/doc_insight_v2/main/media/patient_alone_sm_annotate.jpg)
 
 Our patient as seen by Doc InSight wearer:
 ![Our patient glasses](https://raw.githubusercontent.com/nickbild/doc_insight_v2/main/media/patient_2_sm_crop.jpg)
