@@ -33,7 +33,7 @@ Our patient:<br/>
 Our patient as seen by Doc InSight wearer:
 ![Our patient glasses](https://raw.githubusercontent.com/nickbild/doc_insight_v2/main/media/patient_2_sm_crop.jpg)
 
-A medication bottle:
+A medication bottle:<br/>
 ![](https://raw.githubusercontent.com/nickbild/doc_insight_v2/main/media/bottle_alone_sm.jpg)
 
 Allergy alert example:
